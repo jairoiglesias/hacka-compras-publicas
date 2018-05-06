@@ -5,6 +5,7 @@ module.exports = function(app){
   var consultaCnpj = require('consulta-cnpj')
   var data = require('../data/data.js')
   var mongoInstance = require('../libs/connectdb.js')()
+  var ObjectId = require('mongodb').ObjectID;
 
   app.get('/', (req, res) => {
     res.send('teste')
@@ -138,10 +139,8 @@ module.exports = function(app){
           res.send('1')
 
         })
-       
 
       })
-
 
     })
 
@@ -156,7 +155,7 @@ module.exports = function(app){
       const collection = db.collection('biddings')
 
       if(product == 'all'){
-         collection.find({}).toArray(function(err, result){
+        collection.find({}).toArray(function(err, result){
           if(err) throw err
           console.log(result)
           res.send(result)
@@ -173,5 +172,73 @@ module.exports = function(app){
     })
 
   })
+
+  app.get('/list_offers_by_product/:product', (req, res) => {
+
+    var product = req.params.product
+
+    mongoInstance.then(function(db){
+
+      const collection = db.collection('offers')
+
+      if(product == 'all'){
+        collection.find({}).toArray(function(err, result){
+          if(err) throw err
+          console.log(result)
+          res.send(result)
+        })
+
+      }
+      else{
+        collection.find({product: product}).toArray(function(err, result){
+          if(err) throw err
+          console.log(result)
+          res.send(result)
+        })
+
+      }
+
+    })
+
+  })
+
+  app.get('/list_offers_by_id/:id', (req, res)=>{
+
+    var id = req.params.id
+
+    mongoInstance.then(function(db){
+
+      const collection = db.collection('offers')
+      
+      collection.find({"id_bidding": id}).toArray(function(err, result){
+        if(err) throw err
+        console.log(result)
+        res.send(result)
+      })
+
+    })
+
+  })
+
+  app.post('/update_interested_offer', (req, res) => {
+
+    var id = req.body.id
+    var interested = req.body.interested
+
+    mongoInstance.then(function(db){
+
+      const collection = db.collection('offers')
+      
+      collection.update({"_id": ObjectId(id)}, {$set: {interested: interested}}, function(err, result){
+        if(err) throw err
+        console.log(result)
+        res.send('1')
+      })
+
+    })
+
+  })
+
+
 
 }
