@@ -7,10 +7,6 @@ module.exports = function(app){
   var mongoInstance = require('../libs/connectdb.js')()
   var ObjectId = require('mongodb').ObjectID;
 
-  app.get('/', (req, res) => {
-    res.send('teste')
-  })
-
   app.get('/get_cnpj/:cnpj', (req, res) => {
 
     var cnpj = req.params.cnpj
@@ -95,72 +91,57 @@ module.exports = function(app){
 
   })
 
-  app.get('/list_offers_by_product/:product', (req, res) => {
+  app.post('/save_cnpj', (req, res) => {
 
-    var product = req.params.product
+    var cnpj = req.body.cnpj
+    var name_company = req.body.name_company
+    var type_company = req.body.type_company
+    var tags = req.body.tags
 
-    mongoInstance.then(function(db){
+    var tags = eval(req.body.tags)
+    
+    // Envia Tag List para EndPoint do Watson
 
-      const collection = db.collection('offers')
+    var _tagList = ''
 
-      if(product == 'all'){
-        collection.find({}).toArray(function(err, result){
-          if(err) throw err
-          console.log(result)
-          res.send(result)
-        })
-
-      }
-      else{
-        collection.find({product: product}).toArray(function(err, result){
-          if(err) throw err
-          console.log(result)
-          res.send(result)
-        })
-
-      }
-
+    tags.forEach((value, index) => {
+      _tagList += value.description + ','
     })
 
-  })
+    console.log(_tagList)
 
-  app.get('/list_offers_by_id/:id', (req, res)=>{
+    var requestOptions = {
+      uri : 'http://offer-box.mybluemix.net/api/offer-box/match-tags?textTag='+_tagList,
+      resolveWithFullResponse: true
+    }
 
-    var id = req.params.id
+    rp(requestOptions).then((result) => {
 
-    mongoInstance.then(function(db){
+      var body = JSON.parse(result.body)
 
-      const collection = db.collection('offers')
-      
-      collection.find({_id: ObjectId(id)}).toArray(function(err, result){
-        if(err) throw err
-        console.log(result)
-        res.send(result[0])
+      var tagId = body.output.text[0]
+
+      // Salva o registro
+      var reg = {cnpj, name_company, type_company, tags, tagId}
+
+      mongoInstance.then(function(db){
+
+        const collection = db.collection('companies')
+
+        collection.insertOne(reg, function(err, result){
+          
+          if(err) throw err
+          console.log('1 document inserted')
+
+          res.send('1')
+
+        })
+
       })
 
     })
 
   })
-
-  app.post('/update_interested_offer', (req, res) => {
-
-    var id = req.body.id
-    var interested = req.body.interested
-
-    mongoInstance.then(function(db){
-
-      const collection = db.collection('offers')
-      
-      collection.update({"_id": ObjectId(id)}, {$set: {interested: interested}}, function(err, result){
-        if(err) throw err
-        console.log(result)
-        res.send('1')
-      })
-
-    })
-
-  })
-
 
 
 }
