@@ -129,11 +129,20 @@ module.exports = function(app){
 
       const collection = db.collection('biddings')
 
-      collection.find({product : product}).toArray(function(err, result){
-        if(err) throw err
-        console.log(result)
-        res.send(result)
-      })
+      if(product == 'all'){
+         collection.find({}).toArray(function(err, result){
+          if(err) throw err
+          console.log(result)
+          res.send(result)
+        })
+      }
+      else{
+        collection.find({product : product}).toArray(function(err, result){
+          if(err) throw err
+          console.log(result)
+          res.send(result)
+        })
+      }
 
     })
 
