@@ -174,7 +174,8 @@ module.exports = function(app){
           // Calcula a diferenca de Lat/Lng
 
           var distance = getDistanceV2(lat, lng, lat2, lng2, 'K')
-
+          distance = distance.toFixed(2)
+          
           var reg = {price_unit, id_company, id_bidding, lat, lng, name_company, type_company, product, distance}
 
           collection = db.collection('offers')
