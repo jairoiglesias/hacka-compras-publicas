@@ -109,6 +109,7 @@ module.exports = function(app){
     })
 
     console.log(_tagList)
+    console.log('=======')
 
     var requestOptions = {
       uri : 'http://offer-box.mybluemix.net/api/offer-box/match-tags?textTag='+_tagList,
