@@ -103,19 +103,45 @@ module.exports = function(app){
       var lat = req.body.lat
       var lng = req.body.lng
       var tags = eval(req.body.tags)
+      
+      // Envia Tag List para EndPoint do Watson
 
-      var reg = {product, qtd, lat, lng, tags}
+      var _tagList = ''
 
-      const collection = db.collection('biddings')
+      tags.forEach((value, index) => {
+        _tagList += value.description + ','
+      })
 
-      collection.insertOne(reg, function(err, result){
-        
-        if(err) throw err
-        console.log('1 document inserted')
+      console.log(_tagList)
 
-        res.send('1')
+      var requestOptions = {
+        uri : 'http://offer-box.mybluemix.net/api/offer-box/match-tags?textTag='+_tagList,
+        resolveWithFullResponse: true
+      }
+
+      rp(requestOptions).then((result) => {
+
+        var body = JSON.parse(result.body)
+
+        var tagId = body.output.text[0]
+
+        // Salva o registro
+        var reg = {product, qtd, lat, lng, tags, tagId}
+
+        const collection = db.collection('biddings')
+
+        collection.insertOne(reg, function(err, result){
+          
+          if(err) throw err
+          console.log('1 document inserted')
+
+          res.send('1')
+
+        })
+       
 
       })
+
 
     })
 
