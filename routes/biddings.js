@@ -85,4 +85,32 @@ module.exports = function(app){
 
   })
 
+  app.get('/list_bidding_by_cnpj/:cnpj', (req, res) => {
+
+    var cnpj = req.params.cnpj
+
+    mongoInstance.then(function(db){
+
+      var collection = db.collection('companies')
+
+      // Efetua a pesquisa de empresa para regurar o TagId
+
+      collection.findOne({cnpj:cnpj}, function(err, result){
+
+        var tagId = result.tagId
+
+        collection = db.collection('biddings')
+
+        collection.find({tagId:tagId}).toArray(function(err, result){
+
+          res.send(result)
+
+        })
+
+      })
+
+    })
+
+  })
+
  }
