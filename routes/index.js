@@ -213,7 +213,7 @@ module.exports = function(app){
       collection.find({_id: ObjectId(id)}).toArray(function(err, result){
         if(err) throw err
         console.log(result)
-        res.send(result)
+        res.send(result[0])
       })
 
     })
