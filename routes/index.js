@@ -210,7 +210,7 @@ module.exports = function(app){
 
       const collection = db.collection('offers')
       
-      collection.find({"id_bidding": id}).toArray(function(err, result){
+      collection.find({_id: ObjectId(id)}).toArray(function(err, result){
         if(err) throw err
         console.log(result)
         res.send(result)
